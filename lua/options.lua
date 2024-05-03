@@ -1,6 +1,76 @@
 require "nvchad.options"
 
--- add yours here!
+local o = vim.o
 
--- local o = vim.o
--- o.cursorlineopt ='both' -- to enable cursorline!
+-- Set highlight on search
+o.hlsearch = false
+
+-- Make line numbers default
+vim.wo.number = true
+
+o.tabstop = 2 -- A TAB character looks like 2 spaces
+o.expandtab = true -- Pressing the TAB key will insert spaces instead of a TAB character
+o.softtabstop = 2 -- Number of spaces inserted instead of a TAB character
+o.shiftwidth = 2 -- Number of spaces inserted when indenting
+
+-- Enable mouse mode
+o.mouse = "a"
+-- to enable cursorline!
+o.cursorlineopt = 'both' 
+
+-- Sync clipboard between OS and Neovim.
+--  Remove this option if you want your OS clipboard to remain independent.
+--  See `:help 'clipboard'`
+o.clipboard = "unnamedplus"
+
+-- Enable break indent
+o.breakindent = true
+
+-- Save undo history
+o.undofile = true
+
+-- Case-insensitive searching UNLESS \C or capital in search
+o.ignorecase = true
+o.smartcase = true
+
+-- Keep signcolumn as auto. Set this to 'yes' if you want it enabled
+vim.wo.signcolumn = "auto"
+
+-- Decrease update time
+o.updatetime = 250
+o.timeoutlen = 300
+
+-- Set completeopt to have a better completion experience
+o.completeopt = "menuone,noselect"
+
+-- Set terminal gui colors to true
+o.termguicolors = true
+
+-- add binaries installed by mason.nvim to path
+local is_windows = vim.fn.has("win32") ~= 0
+vim.env.PATH = vim.fn.stdpath "data" .. "/mason/bin" .. (is_windows and ";" or ":") .. vim.env.PATH
+
+if firstload then
+  vim.schedule(function()
+    vim.cmd("MasonInstallAll")
+
+    local packages = {}
+    for k, v in pairs(vim.g.mason_binaries_list) do
+        packages[k] = v
+    end
+
+    local installed = {}
+
+    require("mason-registry"):on("package:install:success", function(pkg)
+        table.insert(installed, pkg.name)
+
+        if #installed == #packages then
+            vim.schedule(function()
+                vim.api.nvim_buf_delete(0, { force = true })
+                vim.api.nvim_buf_delete(0, { force = true })
+                vim.cmd("echo '' | redraw")
+            end)
+        end
+    end)
+  end)
+end
